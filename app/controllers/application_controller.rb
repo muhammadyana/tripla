@@ -1,3 +1,3 @@
 class ApplicationController < ActionController::API
-  include Api::Concerns::ApiHelper
+  include ApiHelper
 end
