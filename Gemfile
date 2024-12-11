@@ -36,6 +36,7 @@ gem 'jsonapi-serializer'
 
 group :development do
   gem 'annotate'
+  gem 'faker'
 end
 
 group :development, :test do
