@@ -20,9 +20,10 @@
 #
 FactoryBot.define do
   factory :sleep_record do
-    user { nil }
-    clock_in_time { "2024-12-11 22:26:28" }
-    clock_out_time { "2024-12-11 22:26:28" }
-    duration_seconds { 1 }
+    association :user
+
+    clock_in_time { Faker::Time.between(from: 2.days.ago, to: 1.day.ago, period: :evening) }
+    clock_out_time { |n| n.clock_in_time + rand(6..9).hours }
+    duration_seconds { |n| (n.clock_out_time - n.clock_in_time).to_i }
   end
 end
