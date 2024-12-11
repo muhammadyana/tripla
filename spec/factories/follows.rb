@@ -21,7 +21,11 @@
 #
 FactoryBot.define do
   factory :follow do
-    follower { nil }
-    followed { nil }
+    association :follower, factory: :user
+    association :followed, factory: :user
+
+    trait :self_follow do
+      followed { follower }
+    end
   end
 end
