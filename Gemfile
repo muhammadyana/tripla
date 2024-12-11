@@ -36,7 +36,6 @@ gem 'jsonapi-serializer'
 
 group :development do
   gem 'annotate'
-  gem 'faker'
 end
 
 group :development, :test do
@@ -45,7 +44,7 @@ group :development, :test do
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
-
+  gem 'faker'
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
   gem 'rspec-rails'
