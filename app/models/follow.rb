@@ -26,11 +26,4 @@ class Follow < ApplicationRecord
 
   # Validations
   validates :follower_id, uniqueness: { scope: :followed_id }
-  validate :cannot_follow_self
-
-  private
-
-  def cannot_follow_self
-    errors.add(:base, "Cannot follow yourself") if follower_id == followed_id
-  end
 end

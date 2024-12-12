@@ -34,26 +34,4 @@ RSpec.describe Follow, type: :model do
 
     it { should validate_uniqueness_of(:follower_id).scoped_to(:followed_id) }
   end
-
-  describe 'custom validations' do
-    let(:user) { create(:user) }
-
-    context 'when attempting to follow self' do
-      subject { build(:follow, follower: user, followed: user) }
-
-      it 'is invalid' do
-        expect(subject).not_to be_valid
-        expect(subject.errors[:base]).to include("Cannot follow yourself")
-      end
-    end
-
-    context 'when following another user' do
-      let(:other_user) { create(:user) }
-      subject { build(:follow, follower: user, followed: other_user) }
-
-      it 'is valid' do
-        expect(subject).to be_valid
-      end
-    end
-  end
 end
