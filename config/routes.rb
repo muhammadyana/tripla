@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   namespace :api do
     namespace :v1 do
-      resources :sleep_records, only: %i[:index, :show] do
+      resources :sleep_records, only: %i[index] do
         post :clock_in, on: :collection
       end
     end

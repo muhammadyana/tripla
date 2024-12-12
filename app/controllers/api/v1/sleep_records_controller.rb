@@ -4,6 +4,11 @@ module Api
       before_action :validate_user_id
       before_action :set_user
 
+      def index
+        sleep_records = @user.sleep_records.desc
+        responder(:created, SleepRecordSerializer.new(sleep_records))
+      end
+
       def clock_in
         @user.sleep_records.where(clock_out_time: nil).update_all(clock_out_time: Time.current)
 
@@ -11,11 +16,6 @@ module Api
 
         @sleep_records = @user.sleep_records.desc
         responder(:created, SleepRecordSerializer.new(@sleep_records))
-      end
-
-      def records
-        sleep_records = @user.sleep_records.desc
-        render json: sleep_records
       end
 
       def following_sleep_records
