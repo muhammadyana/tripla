@@ -30,6 +30,15 @@ class SleepRecord < ApplicationRecord
   scope :for_week, ->(start_date = Time.current) {
     where(clock_in_time: start_date.beginning_of_week..start_date.end_of_week)
   }
+
+  scope :following_records, ->(user) {
+    joins(:user)
+      .where(users: { id: user.followings.select(:id) })
+      .for_week
+      .completed
+      .order(duration_seconds: :desc)
+  }
+
   scope :desc, -> { order(created_at: :desc) }
   scope :completed, -> { where.not(clock_out_time: nil) }
 
