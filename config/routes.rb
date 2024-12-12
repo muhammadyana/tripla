@@ -10,6 +10,9 @@ Rails.application.routes.draw do
         post :clock_in, on: :collection
         get :followings, on: :collection, to: "sleep_records#following_sleep_records"
       end
+
+      post "follow/:target_user_id" => "follows#follow"
+      post "unfollow/:target_user_id" => "follows#unfollow"
     end
   end
 end
