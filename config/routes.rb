@@ -6,9 +6,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   namespace :api do
     namespace :v1 do
-      post :sleep_records, to: 'sleep_records#clock_in'
+      resources :sleep_records, only: %i[:index, :show] do
+        post :clock_in, on: :collection
+      end
     end
   end
-  # Defines the root path route ("/")
-  # root "posts#index"
 end
