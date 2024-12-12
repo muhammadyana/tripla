@@ -10,8 +10,7 @@ module Api
       end
 
       def clock_in
-        current_user.sleep_records.where(clock_out_time: nil).update_all(clock_out_time: Time.current)
-
+        current_user.sleep_records.clock_out_all
         current_user.sleep_records.create!(clock_in_time: Time.current)
 
         sleep_records = current_user.sleep_records.desc

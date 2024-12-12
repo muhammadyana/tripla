@@ -21,7 +21,6 @@
 class SleepRecord < ApplicationRecord
   # Relationships
   belongs_to :user
-  before_save :calculate_duration
 
   # Validations
   validates :clock_in_time, presence: true
@@ -40,13 +39,16 @@ class SleepRecord < ApplicationRecord
   }
 
   scope :desc, -> { order(created_at: :desc) }
+  scope :uncompleted, -> { where(clock_out_time: nil) }
   scope :completed, -> { where.not(clock_out_time: nil) }
 
-  private
+  def self.clock_out_all
+    current_time = Time.current
+    formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S')
 
-  def calculate_duration
-    return unless clock_in_time && clock_out_time
-
-    self.duration_seconds = (clock_out_time - clock_in_time).to_i
+    uncompleted.update_all(
+      clock_out_time: current_time,
+      duration_seconds: Arel.sql("CAST((julianday('#{formatted_time}') - julianday(clock_in_time)) * 86400 AS INTEGER)")
+    )
   end
 end
