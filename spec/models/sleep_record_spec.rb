@@ -69,5 +69,49 @@ RSpec.describe SleepRecord, type: :model do
         expect(SleepRecord.completed).not_to include(incomplete_record)
       end
     end
+
+    describe '.following_records' do
+      let(:user1) { create(:user) }
+      let(:user2) { create(:user) }
+      let(:user3) { create(:user) }
+
+      before do
+        user1.follow(user2)
+
+        @followed_complete = create(:completed_sleep_record,
+          user: user2,
+          clock_in_time: Time.current,
+          clock_out_time: Time.current + 8.hours,
+          duration_seconds: 8.hours.to_i
+        )
+        @followed_incomplete = create(:incomplete_sleep_record,
+          user: user2,
+          clock_in_time: Time.current
+        )
+        @followed_old = create(:completed_sleep_record,
+          user: user2,
+          clock_in_time: 2.weeks.ago
+        )
+
+        @not_followed = create(:completed_sleep_record,
+          user: user3,
+          clock_in_time: Time.current
+        )
+      end
+
+      it 'orders by duration_seconds desc' do
+        short_record = create(:completed_sleep_record,
+          user: user2,
+          clock_in_time: Time.current,
+          clock_out_time: Time.current + 6.hours,
+          duration_seconds: 6.hours.to_i
+        )
+
+        results = SleepRecord.following_records(user1).to_a
+        expect(results.first.duration_seconds).to be > results.last.duration_seconds
+        expect(results.first).to eq(@followed_complete)
+        expect(results.last).to eq(short_record)
+      end
+    end
   end
 end
