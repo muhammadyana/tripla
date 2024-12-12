@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :sleep_records, only: %i[index] do
         post :clock_in, on: :collection
+        get :followings, on: :collection, to: "sleep_records#following_sleep_records"
       end
     end
   end

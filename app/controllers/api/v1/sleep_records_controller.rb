@@ -6,27 +6,27 @@ module Api
 
       def index
         sleep_records = @user.sleep_records.desc
-        responder(:created, SleepRecordSerializer.new(sleep_records))
+        responder(:ok, SleepRecordSerializer.new(sleep_records))
       end
 
       def clock_in
         @user.sleep_records.where(clock_out_time: nil).update_all(clock_out_time: Time.current)
 
-        @sleep_record = @user.sleep_records.create!(clock_in_time: Time.current)
+        @user.sleep_records.create!(clock_in_time: Time.current)
 
-        @sleep_records = @user.sleep_records.desc
-        responder(:created, SleepRecordSerializer.new(@sleep_records))
+        sleep_records = @user.sleep_records.desc
+        responder(:created, SleepRecordSerializer.new(sleep_records))
       end
 
       def following_sleep_records
-        records = SleepRecord
+        sleep_records = SleepRecord
           .joins(:user)
           .merge(User.joins(:followers).where(followers: { id: @user.id }))
           .for_week
           .completed
           .order(duration_seconds: :desc)
 
-        render json: records, include: :user
+        responder(:ok, SleepRecordSerializer.new(sleep_records))
       end
 
       private
