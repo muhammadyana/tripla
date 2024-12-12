@@ -9,7 +9,8 @@ module Api
 
         @sleep_record = @user.sleep_records.create!(clock_in_time: Time.current)
 
-        render json: @user.sleep_records.order(created_at: :desc), status: :created
+        @sleep_records = @user.sleep_records.order(created_at: :desc)
+        responder(:created, SleepRecordSerializer.new(@sleep_records))
       end
 
       def records
