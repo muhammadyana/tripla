@@ -113,5 +113,29 @@ RSpec.describe SleepRecord, type: :model do
         expect(results.last).to eq(short_record)
       end
     end
+
+    describe '.clock_out_all' do
+      let(:user) { create(:user) }
+      let!(:unclosed_record) { create(:incomplete_sleep_record, user: user, clock_in_time: 2.hours.ago) }
+      let!(:closed_record) { create(:completed_sleep_record, user: user) }
+
+      it 'closes all uncompleted records' do
+        travel_to(Time.current) do
+          SleepRecord.clock_out_all
+          unclosed_record.reload
+
+          expect(unclosed_record.clock_out_time).to eq(Time.current)
+          # Allow 1 second difference
+          expect(unclosed_record.duration_seconds).to be_within(1).of(2.hours.to_i)
+        end
+      end
+
+      it 'does not affect already closed records' do
+        original_clock_out = closed_record.clock_out_time
+        SleepRecord.clock_out_all
+
+        expect(closed_record.reload.clock_out_time).to eq(original_clock_out)
+      end
+    end
   end
 end
