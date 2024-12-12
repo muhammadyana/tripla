@@ -22,19 +22,19 @@
 FactoryBot.define do
   factory :sleep_record do
     association :user
-    clock_in_time { Faker::Time.between(from: 2.days.ago, to: 1.day.ago) }
+    clock_in_time { Time.current }
+    clock_out_time { nil }
+
+    factory :completed_sleep_record do
+      clock_out_time { Time.current }
+    end
+
+    factory :incomplete_sleep_record do
+      clock_out_time { nil }
+    end
 
     trait :completed do
-      clock_out_time { |n| n.clock_in_time + rand(6..9).hours }
-      duration_seconds { |n| (n.clock_out_time - n.clock_in_time).to_i }
+      clock_out_time { Time.current }
     end
-
-    trait :incomplete do
-      clock_out_time { nil }
-      duration_seconds { 0 }
-    end
-
-    factory :completed_sleep_record, traits: [:completed]
-    factory :incomplete_sleep_record, traits: [:incomplete]
   end
 end
