@@ -28,17 +28,17 @@ gem "bootsnap", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 # additional gems
-gem 'redis-rails'
-gem 'sidekiq'
-gem 'rack-attack'
-gem 'jsonapi-serializer'
+gem "redis-rails"
+gem "sidekiq"
+gem "rack-attack"
+gem "jsonapi-serializer"
 
 group :development do
-  gem 'annotate'
+  gem "annotate"
 end
 
 group :test do
-  gem 'timecop'
+  gem "timecop"
 end
 
 group :development, :test do
@@ -47,12 +47,10 @@ group :development, :test do
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
-  gem 'faker'
+  gem "faker"
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-  gem 'rspec-rails'
-  gem 'factory_bot_rails'
-  gem 'shoulda-matchers', '~> 6.0'
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "shoulda-matchers", "~> 6.0"
 end
-
-
