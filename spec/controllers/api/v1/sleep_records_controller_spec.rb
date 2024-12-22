@@ -100,7 +100,7 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
             post :clock_in, params: { user_id: user.id }
           }.to change(SleepRecord, :count).by(1)
 
-          [old_unclosed, recent_unclosed].each do |record|
+          [ old_unclosed, recent_unclosed ].each do |record|
             record.reload
             expect(record.clock_out_time).to eq(Time.current)
             expect(record.duration_seconds).to be_positive
