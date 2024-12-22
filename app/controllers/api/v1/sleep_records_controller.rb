@@ -9,11 +9,15 @@ module Api
       end
 
       def clock_in
-        current_user.sleep_records.clock_out_all
         current_user.sleep_records.create!(clock_in_time: Time.current)
 
         sleep_records = current_user.sleep_records.desc
         responder(:created, SleepRecordSerializer.new(sleep_records))
+      end
+
+      def clock_out
+        current_user.sleep_records.clock_out_all
+        responder(:ok, SleepRecordSerializer.new(current_user.sleep_records.desc))
       end
 
       def following_sleep_records
