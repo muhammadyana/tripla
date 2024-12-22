@@ -57,58 +57,6 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
   end
 
   describe 'POST #clock_in' do
-    context 'with existing unclosed sleep record' do
-      let(:fixed_time) { Time.zone.local(2024, 1, 1, 12, 0, 0) }
-
-      let!(:unclosed_record) do
-        travel_to(fixed_time - 2.hours) do
-          create(:sleep_record,
-            user: user,
-            clock_in_time: Time.current,
-            clock_out_time: nil
-          )
-        end
-      end
-
-      it 'closes existing record with correct duration and creates new one' do
-        travel_to(fixed_time) do
-          expect {
-            post :clock_in, params: { user_id: user.id }
-          }.to change(SleepRecord, :count).by(1)
-
-          unclosed_record.reload
-          expect(unclosed_record.clock_out_time).to be_within(1.second).of(fixed_time)
-          expect(unclosed_record.duration_seconds).to be_within(1).of(2.hours.to_i)
-
-          new_record = user.sleep_records.order(created_at: :desc).first
-          expect(new_record.clock_in_time).to be_within(1.second).of(fixed_time)
-          expect(new_record.clock_out_time).to be_nil
-          expect(new_record.duration_seconds).to eq(0)
-
-          expect(response).to have_http_status(:created)
-        end
-      end
-    end
-
-    context 'with multiple unclosed records' do
-      let!(:old_unclosed) { create(:sleep_record, user: user, clock_in_time: 3.hours.ago, clock_out_time: nil) }
-      let!(:recent_unclosed) { create(:sleep_record, user: user, clock_in_time: 1.hour.ago, clock_out_time: nil) }
-
-      it 'closes all unclosed records and creates new one' do
-        travel_to(Time.current) do
-          expect {
-            post :clock_in, params: { user_id: user.id }
-          }.to change(SleepRecord, :count).by(1)
-
-          [ old_unclosed, recent_unclosed ].each do |record|
-            record.reload
-            expect(record.clock_out_time).to eq(Time.current)
-            expect(record.duration_seconds).to be_positive
-          end
-        end
-      end
-    end
-
     it 'creates a new sleep record when no unclosed records exist' do
       travel_to(Time.current) do
         expect {
@@ -121,6 +69,87 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
         expect(new_record.duration_seconds).to eq(0)
 
         expect(response).to have_http_status(:created)
+      end
+    end
+
+    it 'creates a new sleep record even if unclosed records exist (no longer closes them)' do
+      # Create an old unclosed record
+      old_unclosed = create(:sleep_record, user: user, clock_in_time: 2.hours.ago, clock_out_time: nil)
+
+      travel_to(Time.current) do
+        expect {
+          post :clock_in, params: { user_id: user.id }
+        }.to change(SleepRecord, :count).by(1)
+
+        # old_unclosed remains unclosed because the logic is now in #clock_out
+        old_unclosed.reload
+        expect(old_unclosed.clock_out_time).to be_nil
+
+        new_record = user.sleep_records.last
+        expect(new_record.clock_in_time).to eq(Time.current)
+        expect(new_record.clock_out_time).to be_nil
+        expect(new_record.duration_seconds).to eq(0)
+
+        expect(response).to have_http_status(:created)
+      end
+    end
+  end
+
+  describe 'POST #clock_out' do
+    context 'with existing unclosed sleep record' do
+      let(:fixed_time) { Time.zone.local(2024, 1, 1, 12, 0, 0) }
+
+      let!(:unclosed_record) do
+        travel_to(fixed_time - 2.hours) do
+          create(:sleep_record, user: user, clock_in_time: Time.current, clock_out_time: nil)
+        end
+      end
+
+      it 'closes existing record with correct duration' do
+        travel_to(fixed_time) do
+          expect {
+            post :clock_out, params: { user_id: user.id }
+          }.not_to change(SleepRecord, :count)  # Just closes, doesn't create
+
+          unclosed_record.reload
+          expect(unclosed_record.clock_out_time).to be_within(1.second).of(fixed_time)
+          # 2 hours difference
+          expect(unclosed_record.duration_seconds).to be_within(1).of(2.hours.to_i)
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    context 'with multiple unclosed records' do
+      let!(:old_unclosed) { create(:sleep_record, user: user, clock_in_time: 3.hours.ago, clock_out_time: nil) }
+      let!(:recent_unclosed) { create(:sleep_record, user: user, clock_in_time: 1.hour.ago, clock_out_time: nil) }
+
+      it 'closes all unclosed records' do
+        travel_to(Time.current) do
+          expect {
+            post :clock_out, params: { user_id: user.id }
+          }.not_to change(SleepRecord, :count)
+
+          [old_unclosed, recent_unclosed].each do |record|
+            record.reload
+            expect(record.clock_out_time).to eq(Time.current)
+            expect(record.duration_seconds).to be_positive
+          end
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+    end
+
+    context 'without any unclosed sleep records' do
+      it 'returns success and empty records' do
+        post :clock_out, params: { user_id: user.id }
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response['success']).to be true
+        expect(json_response['message']['data']).to eq([])
       end
     end
   end
