@@ -16,6 +16,6 @@ class ApplicationController < ActionController::API
   end
 
   def unauthorized_error
-    responder(:unauthorized, 'Authentication failed. Please provide a valid user ID.')
+    responder(:unauthorized, "Authentication failed. Please provide a valid user ID.")
   end
 end

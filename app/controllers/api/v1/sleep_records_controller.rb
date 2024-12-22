@@ -1,7 +1,6 @@
 module Api
   module V1
     class SleepRecordsController < ApplicationController
-
       def index
         sleep_records = Rails.cache.fetch("user_sleep_records_#{current_user.id}", expires_in: 1.hour) do
           current_user.sleep_records.desc

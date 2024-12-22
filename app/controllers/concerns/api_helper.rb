@@ -14,7 +14,7 @@ module ApiHelper
     status_message = ::Rack::Utils::HTTP_STATUS_CODES[status_code]
 
     response = {
-      success: status_code.to_s.start_with?('2'),
+      success: status_code.to_s.start_with?("2"),
       code: status_code,
       status: status_message,
       message: message || status_message
@@ -26,7 +26,7 @@ module ApiHelper
     render json: {
       success: false,
       code: 500,
-      status: 'Internal Server Error',
+      status: "Internal Server Error",
       message: "An unexpected error occurred. Error: #{e.message}"
     }, status: :internal_server_error
   end
