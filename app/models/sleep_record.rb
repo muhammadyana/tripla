@@ -44,7 +44,7 @@ class SleepRecord < ApplicationRecord
 
   def self.clock_out_all
     current_time = Time.current
-    formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S')
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
     uncompleted.update_all(
       clock_out_time: current_time,
