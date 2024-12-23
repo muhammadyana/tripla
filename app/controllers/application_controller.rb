@@ -19,4 +19,8 @@ class ApplicationController < ActionController::API
   def unauthorized_error
     responder(:unauthorized, "Authentication failed. Please provide a valid user ID.")
   end
+
+  def per_page
+    params[:per_page] || 10
+  end
 end
