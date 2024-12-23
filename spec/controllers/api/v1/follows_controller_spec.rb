@@ -1,16 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::FollowsController, type: :controller do
-  let(:user) { create(:user) }
+  let(:user)        { create(:user) }
   let(:target_user) { create(:user) }
 
   describe 'POST #follow' do
-    context 'with valid parameters' do
+    context 'when parameters are valid' do
       it 'follows a new user successfully' do
         post :follow, params: { user_id: user.id, target_user_id: target_user.id }
 
         expect(response).to have_http_status(:created)
-        expect(user.following?(target_user)).to be true
+        expect(user.following?(target_user)).to eq(true)
       end
 
       it 'returns conflict when already following' do
@@ -42,21 +42,32 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
   end
 
   describe 'POST #unfollow' do
-    context 'with valid parameters' do
+    context 'when parameters are valid' do
       before { user.follow(target_user) }
 
       it 'unfollows successfully' do
         post :unfollow, params: { user_id: user.id, target_user_id: target_user.id }
 
         expect(response).to have_http_status(:ok)
-        expect(user.following?(target_user)).to be false
+        expect(user.following?(target_user)).to eq(false)
       end
     end
 
     context 'when not following' do
       it 'returns not found error' do
         post :unfollow, params: { user_id: user.id, target_user_id: target_user.id }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
 
+    context 'with invalid parameters' do
+      it 'returns error when user does not exist' do
+        post :follow, params: { user_id: 999999, target_user_id: target_user.id }
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'returns error when target user does not exist' do
+        post :follow, params: { user_id: user.id, target_user_id: 999999 }
         expect(response).to have_http_status(:not_found)
       end
     end
