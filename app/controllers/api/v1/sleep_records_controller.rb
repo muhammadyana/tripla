@@ -12,11 +12,9 @@ module Api
       end
 
       def clock_in
-        current_user.sleep_records.create!(clock_in_time: Time.current)
+        sleep_record = current_user.sleep_records.create!(clock_in_time: Time.current)
 
-        pagy, sleep_records = pagy(current_user.sleep_records.desc, items: per_page)
-
-        responder(:created, SleepRecordSerializer.new(sleep_records).to_hash.merge(pagination: pagy))
+        responder(:created, SleepRecordSerializer.new(sleep_record))
       end
 
       def clock_out
