@@ -12,13 +12,13 @@
 #
 # Indexes
 #
-#  index_sleep_records_on_user_id  (user_id)
+#  index_sleep_records_on_user_id                    (user_id)
+#  index_sleep_records_on_user_id_and_clock_in_time  (user_id,clock_in_time)
 #
 # Foreign Keys
 #
 #  user_id  (user_id => users.id)
 #
-# spec/factories/sleep_records.rb
 FactoryBot.define do
   factory :sleep_record do
     association :user
