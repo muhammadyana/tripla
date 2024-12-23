@@ -32,6 +32,7 @@ gem "redis-rails"
 gem "sidekiq"
 gem "rack-attack"
 gem "jsonapi-serializer"
+gem 'pagy'
 
 group :development do
   gem "annotate"
