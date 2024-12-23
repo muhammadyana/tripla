@@ -14,7 +14,7 @@ module Api
       def clock_in
         current_user.sleep_records.create!(clock_in_time: Time.current)
 
-        pagy, sleep_records = pagy(sleep_records = current_user.sleep_records.desc, items: per_page)
+        pagy, sleep_records = pagy(current_user.sleep_records.desc, items: per_page)
 
         responder(:created, SleepRecordSerializer.new(sleep_records).to_hash.merge(pagination: pagy))
       end
@@ -35,7 +35,8 @@ module Api
             .order(duration_seconds: :desc)
         end
 
-        responder(:ok, SleepRecordSerializer.new(sleep_records))
+        pagy, sleep_records = pagy(sleep_records, items: per_page)
+        responder(:ok, SleepRecordSerializer.new(sleep_records).to_hash.merge(pagination: pagy))
       end
     end
   end
