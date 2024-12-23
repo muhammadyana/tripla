@@ -7,20 +7,23 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
       'code' => 200,
       'status' => 'OK',
       'success' => true,
-      'message' => {
-        'data' => [
-          {
-            'id' => '1',
-            'type' => 'sleep_record',
-            'attributes' => hash_including(
-              'clock_in_time' => kind_of(String),
-              'clock_out_time' => satisfy { |v| v.nil? || v.is_a?(String) },
-              'duration_seconds' => kind_of(Integer),
-              'user_id' => kind_of(Integer)
+      'message' => a_hash_including(
+        'data' => be_empty.or(
+          a_collection_including(
+            a_hash_including(
+              'id' => kind_of(String),
+              'type' => 'sleep_record',
+              'attributes' => a_hash_including(
+                'clock_in_time' => kind_of(String),
+                'clock_out_time' => satisfy { |v| v.nil? || v.is_a?(String) },
+                'duration_seconds' => kind_of(Integer),
+                'user_id' => kind_of(Integer)
+              )
             )
-          }
-        ]
-      }
+          )
+        ),
+        'pagination' => anything
+      )
     }
   end
 
@@ -53,6 +56,38 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
 
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)).to match(serialized_response)
+    end
+
+    context 'pagination' do
+      before do
+        create_list(:sleep_record, 5, user: user)
+      end
+
+      it 'returns paginated sleep records (page 1)' do
+        get :index, params: { user_id: user.id, page: 1, per_page: 2 }
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        data = json_response['message']['data']
+        pagination = json_response['message']['pagination']
+
+        expect(data.size).to eq(2)
+        expect(pagination['limit']).to eq(2)
+        expect(pagination['page']).to eq(1)
+      end
+
+      it 'returns paginated sleep records (page 2)' do
+        get :index, params: { user_id: user.id, page: 2, per_page: 2 }
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        data = json_response['message']['data']
+        pagination = json_response['message']['pagination']
+
+        expect(data.size).to eq(2)
+        expect(pagination['limit']).to eq(2)
+        expect(pagination['page']).to eq(2)
+      end
     end
   end
 
