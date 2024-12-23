@@ -6,21 +6,31 @@ module Api
       before_action :set_target_user, only: %i[follow unfollow]
 
       def follow
-        if @user.following?(@target_user)
-          responder(:conflict, "You are already following #{@target_user.name}")
-        elsif @user.follow(@target_user)
-          responder(:created, "Successfully followed #{@target_user.name}")
-        else
+        if @user.id == @target_user.id
           responder(:unprocessable_content, "Cannot follow yourself")
+          return
+        end
+
+        Follow.transaction do
+          if @user.following?(@target_user)
+            responder(:conflict, "You are already following #{@target_user.name}")
+          else
+            follow = Follow.lock.find_or_initialize_by(follower_id: @user.id, followed_id: @target_user.id)
+            follow.save!
+            responder(:created, "Successfully followed #{@target_user.name}")
+          end
         end
       end
 
       def unfollow
-        if @user.following?(@target_user)
-          @user.unfollow(@target_user)
-          responder(:ok, "Successfully unfollowed #{@target_user.name}")
-        else
-          responder(:not_found, "You are not following #{@target_user.name}")
+        Follow.transaction do
+          if @user.following?(@target_user)
+            follow = Follow.lock.find_by(follower_id: @user.id, followed_id: @target_user.id)
+            follow&.destroy!
+            responder(:ok, "Successfully unfollowed #{@target_user.name}")
+          else
+            responder(:not_found, "You are not following #{@target_user.name}")
+          end
         end
       end
 
