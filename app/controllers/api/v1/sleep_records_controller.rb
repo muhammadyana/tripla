@@ -5,7 +5,10 @@ module Api
         sleep_records = Rails.cache.fetch("user_sleep_records_#{current_user.id}", expires_in: 1.hour) do
           current_user.sleep_records.desc
         end
-        responder(:ok, SleepRecordSerializer.new(sleep_records))
+
+        pagy, @sleep_records = pagy(sleep_records, items: per_page)
+
+        responder(:ok, SleepRecordSerializer.new(sleep_records).to_hash.merge(pagination: pagy))
       end
 
       def clock_in

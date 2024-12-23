@@ -1,8 +1,5 @@
 class ApplicationSerializer
   include FastJsonapi::ObjectSerializer
-  include ImageHelper
-  include DateHelper
-  # cache_options enabled: true, cache_length: 1.hour
 
   def to_h
     data = serializable_hash

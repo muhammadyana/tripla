@@ -18,7 +18,6 @@
 #
 #  user_id  (user_id => users.id)
 #
-class SleepRecordSerializer
-  include JSONAPI::Serializer
+class SleepRecordSerializer < ApplicationSerializer
   attributes :id, :clock_in_time, :clock_out_time, :duration_seconds, :user_id, :created_at, :updated_at
 end
